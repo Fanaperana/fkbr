@@ -11,7 +11,7 @@ export function calculateIdealCellSize(
   config: Config
 ): number {
   // Target having around 400-600 cells total to ensure we have enough coordinates
-  const targetCellCount = 500;
+  const targetCellCount = 1000;
   const screenArea = screenWidth * screenHeight;
   const idealCellArea = screenArea / targetCellCount;
   const idealCellSize = Math.sqrt(idealCellArea);

@@ -253,16 +253,16 @@ function App() {
             data-id={`cell-${Math.floor(index / gridDimensions.columns)}-${index % gridDimensions.columns}`}
             id={cell.coord}
             className={`
-              border-r border-b border-dashed border-yellow-700 border-opacity-20 
-              text-yellow-100 text-opacity-70 text-xs
+              border-r border-b border-dashed border-yellow-700 border-opacity-40 
+              text-[cornsilk] text-xs
               flex items-center justify-center
               transition-colors
-              hover:bg-white hover:bg-opacity-20
+              !bg-white !bg-opacity-20
             `}
             style={{
               width: `${cell.width}px`,
               height: `${cell.height}px`,
-              textShadow: `0px 0px 1px black`
+              textShadow: `1px 0px 5px black`
             }}
             onClick={(e) => {
               const rect = (e.target as HTMLElement).getBoundingClientRect();

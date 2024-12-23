@@ -26,7 +26,6 @@
         "focus": true,
         "shadow": false,
         "skipTaskbar": true,
-        "contentProtected": true,
         "windowEffects": null,
         "visible": false
       }
