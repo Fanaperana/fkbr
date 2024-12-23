@@ -4,8 +4,8 @@ import { Window } from "@tauri-apps/api/window"
 import "./App.css";
 import { Config, DEFAULT_CONFIG, GridCell } from "./lib/types";
 import { calculateIdealCellSize, generateCoordinate, usedCoordinates } from "./lib/utils";
-import { register, unregister, unregisterAll } from "@tauri-apps/plugin-global-shortcut";
-import { getCurrentWindow } from '@tauri-apps/api/window';
+import { register } from "@tauri-apps/plugin-global-shortcut";
+// import { getCurrentWindow } from '@tauri-apps/api/window';
 import {
   restoreStateCurrent,
   StateFlags,
