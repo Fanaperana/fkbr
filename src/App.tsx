@@ -2,101 +2,88 @@ import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { Window } from "@tauri-apps/api/window"
 import "./App.css";
-import { register, unregister } from "@tauri-apps/plugin-global-shortcut";
+import { Config, DEFAULT_CONFIG, GridCell } from "./lib/types";
+import { calculateIdealCellSize, generateCoordinate, usedCoordinates } from "./lib/utils";
+import { register, unregister, unregisterAll } from "@tauri-apps/plugin-global-shortcut";
+import { getCurrentWindow } from '@tauri-apps/api/window';
+import {
+  restoreStateCurrent,
+  StateFlags,
+} from '@tauri-apps/plugin-window-state';
 
 const appWindow = new Window('main');
 
-interface GridCell {
-  coord: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
+// async function initShotcut() {
+//   await register('CommandOrControl+Alt+I', () => {
+//     console.log("SHORTCUT TRIGGERED");
+//     appWindow.show();
+//   })
+// }
 
-interface Config {
-  gridSize: number;
-}
+appWindow.listen('tauri://focus', async () => {
+  await appWindow.setDecorations(false);
+});
 
-const DEFAULT_CONFIG: Config = {
-  gridSize: 40
-};
+await register('CommandOrControl+Alt+I', async () => {
+  console.log("SHORTCUT TRIGGERED");
+  // Ensure the window is visible and focused
+  // await appWindow.show();
+  // await appWindow.setDecorations(false);
+  // // await appWindow.setFocus();
+  // // await appWindow.setFullscreen(true);
+  // // await appWindow.setAlwaysOnTop(true);
+  // // await getCurrentWindow().show();
+  // // await getCurrentWindow().setFullscreen(true);
+  // // await getCurrentWindow().setAlwaysOnTop(true);
 
-const COLUMNS: string[] = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-const ROWS: string[] = Array.from({ length: 9 }, (_, i) => (i + 1).toString());
-
-function generateCoordinate(index: number): string {
-  const upperLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  const lowerLetters = 'abcdefghijklmnopqrstuvwxyz';
-  const numbers = '123456789';
-  
-  // For each letter we have:
-  // 52 letter pairs (AA-AZ, Aa-Az) + 18 number combinations (A1-A9 and 1A-9A)
-  const combinationsPerLetter = (26 + 26) + (9 * 2);
-  const currentLetter = upperLetters[Math.floor(index / combinationsPerLetter)];
-  
-  if (!currentLetter) {
-    console.warn('Ran out of coordinates at index:', index);
-    return 'XX'; // fallback coordinate
-  }
-  
-  // Get position within the current letter's combinations
-  const positionInGroup = index % combinationsPerLetter;
-  
-  if (positionInGroup < 52) {
-    // First 52 combinations are letter pairs (AA-AZ, then Aa-Az)
-    if (positionInGroup < 26) {
-      // Uppercase pairs (AA-AZ)
-      return `${currentLetter}${upperLetters[positionInGroup]}`;
-    } else {
-      // Lowercase pairs (Aa-Az)
-      return `${currentLetter}${lowerLetters[positionInGroup - 26]}`;
-    }
-  } else {
-    // Remaining combinations are number pairs
-    const numberPosition = (positionInGroup - 52) % 18;
-    const number = numbers[Math.floor(numberPosition / 2)];
-    
-    // Alternate between number-first and letter-first
-    return numberPosition % 2 === 0 
-      ? `${currentLetter}${number}` 
-      : `${number}${currentLetter}`;
-  }
-}
-
+  // // Add a small delay to ensure the window system processes the request
+  // setTimeout(async () => {
+  //   await appWindow.setFocus();
+  //   // await getCurrentWindow().setFocus();
+  // }, 100);
+  restoreStateCurrent(StateFlags.ALL);
+})
 
 function App() {
-
-  const [isVisible, setIsVisible] = useState<boolean>(false);
   const [gridCells, setGridCells] = useState<GridCell[]>([]);
   const [config] = useState<Config>(DEFAULT_CONFIG);
-  const [lastClicked, setLastClicked] = useState<string | null>(null);
+  const [gridDimensions, setGridDimensions] = useState({ columns: 0, rows: 0 });
+  const [currentInput, setCurrentInput] = useState<string[]>([]);
 
   useEffect(() => {
     const calculateGridCells = () => {
-      const screenWidth: number = window.innerWidth;
-      const screenHeight: number = window.innerHeight;
-      const cellWidth: number = screenWidth / config.gridSize;
-      const cellHeight: number = screenHeight / config.gridSize;
+      // Clear used coordinates when recalculating grid
+      usedCoordinates.clear();
+      
+      const screenWidth = window.innerWidth;
+      const screenHeight = window.innerHeight;
+
+      // Calculate ideal cell size based on screen dimensions
+      const idealCellSize = calculateIdealCellSize(screenWidth, screenHeight, config);
+
+      // Calculate grid dimensions
+      const columns = Math.floor(screenWidth / idealCellSize);
+      const rows = Math.floor(screenHeight / idealCellSize);
+
+      // Calculate actual cell size to fill screen
+      const cellWidth = Math.floor(screenWidth / columns);
+      const cellHeight = Math.floor(screenHeight / rows);
+
+      setGridDimensions({ columns, rows });
 
       const cells: GridCell[] = [];
-      let coordIndex = 0;
 
-      for (let i = 0; i < config.gridSize; i++) {
-        for (let j = 0; j < config.gridSize; j++) {
-          // Generate unique coordinate
-          const coord = generateCoordinate(coordIndex++);
-          
-          // Calculate absolute screen position
-          const x = Math.round(j * cellWidth);
-          const y = Math.round(i * cellHeight);
+      for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < columns; j++) {
+          const coord = generateCoordinate(i, j, columns);
           
           cells.push({
             coord,
-            x,
-            y,
-            width: Math.round(cellWidth),
-            height: Math.round(cellHeight),
+            x: j * cellWidth,
+            y: i * cellHeight,
+            width: cellWidth,
+            height: cellHeight,
+            isHighlighted: false
           });
         }
       }
@@ -107,126 +94,155 @@ function App() {
 
     window.addEventListener('resize', calculateGridCells);
     return () => window.removeEventListener('resize', calculateGridCells);
-  }, [config.gridSize]);
+  }, [config.minCellSize, config.maxCellSize]);
 
-  let cords = Array<String>();
+  const highlightCell = (coord: string) => {
+    setGridCells(cells => 
+      cells.map(cell => ({
+        ...cell,
+        isHighlighted: cell.coord.toUpperCase() === coord.toUpperCase()
+      }))
+    );
+    
+    // Reset highlight after 1 second
+    setTimeout(() => {
+      setGridCells(cells => 
+        cells.map(cell => ({
+          ...cell,
+          isHighlighted: false
+        }))
+      );
+    }, 1000);
+  };
+
+  
   const handleKeyEvent = (event: KeyboardEvent) => {
     event.preventDefault();
     console.log('event', event);
 
-    if (cords.length > 2) {
+    if (event.key === 'Escape') {
+      setCurrentInput([]);
+      return;
+    }
+    
+    if (event.key === 'Backspace') {
+      setCurrentInput(prev => prev.slice(0, -1));
       return;
     }
 
-    if (event.code.startsWith("Key")) {
-      cords.push(event.key);
+    if (currentInput.length >= 3) return;
+
+    if (!event.ctrlKey || !event.altKey) {
+      const key = event.key.toUpperCase();
+      if (/^[A-Z0-9]$/.test(key)) {
+        setCurrentInput(prev => {
+          const newInput = [...prev, key];
+          if (newInput.length === 2) {
+            highlightCell(newInput.join(''));
+          }
+          return newInput;
+        });
+      }
     }
-
-    if (event.key === 'Backspace' || event.code === 'Backspace') {
-      cords.pop();
-    }
-
-
-    console.log('cords', cords)
   }
 
-  useEffect(()=> {
-    window.addEventListener('keyup', handleKeyEvent);
+  useEffect(()=> {    
+    window.addEventListener('keyup', handleKeyEvent);    
     return () => window.removeEventListener('keyup', handleKeyEvent)
-  }, []);
+  }, [currentInput]);
 
-  // useEffect(() => {
-  //   let cords = Array<String>();
-  //   window.addEventListener('keyup', function (event: KeyboardEvent) {
-  //     event.preventDefault();
-  //     console.log(event);
+  useEffect(()=>{
+    if (currentInput.length >= 2) {      
+      const theCell = document.getElementById(`${currentInput.slice(0, 2).join('').toUpperCase()}`);
+      // console.log(theCell, `${currentInput.join('').toUpperCase()}`);
 
+      if (theCell) {
+        // Get cell dimensions
+        const rect = theCell.getBoundingClientRect();
+        const originalContent = theCell.innerHTML;
+        theCell.innerHTML = '';
 
-  //   });
-  //   const handleKeyPress = async (e: KeyboardEvent): Promise<void> => {
-  //     e.preventDefault();
-  //     // if (!isVisible) return;
-
-  //     // console.log(e.code)
-  //     if(cords.length > 2) {
-        
-  //       cords = [];
-  //     }
-
-  //     // Build the coordinate as we type
-  //     const key = e.key.toUpperCase();
-  //     const cell = gridCells.find(c => c.coord === key);
+        // Create sub cells based on cell dimensions
+        if (rect.width < 50 && rect.height < 50) {
+          // Create 2x2 grid
+          const grid = document.createElement('div');
+          grid.className = 'grid w-full h-full grid-cols-2';
+          
+          for (let i = 1; i <= 4; i++) {
+            const subCell = document.createElement('div');
+            subCell.className = 'flex items-center justify-center border-b border-r border-yellow-700 border-dashed border-opacity-20';
+            subCell.id = `sub-cell${i}`;
+            subCell.textContent = i.toString();
+            grid.appendChild(subCell);
+          }
+          
+          theCell.appendChild(grid);
+        } else {
+          // Create 3x3 grid
+          const grid = document.createElement('div');
+          grid.className = 'grid w-full h-full grid-cols-3';
+          
+          for (let i = 1; i <= 9; i++) {
+            const subCell = document.createElement('div');
+            subCell.className = 'flex items-center justify-center border-b border-r border-yellow-700 border-dashed border-opacity-20';
+            subCell.id = `sub-cell${i}`;
+            subCell.textContent = i.toString();
+            grid.appendChild(subCell);
+          }
+          
+          theCell.appendChild(grid);
+        }
       
-  //     if (cell) {
-  //       try {
-  //         setLastClicked(key);
-  //         const screenX = Math.round(cell.x + cell.width / 2);
-  //         const screenY = Math.round(cell.y + cell.height / 2);
+        theCell.classList.add('border-t','border-l','!border-yellow-400');
+
+        // Function to restore original state
+        const restoreCell = () => {
+          theCell.innerHTML = originalContent;
+          theCell.classList.remove('border-t','border-l','!border-yellow-400');
+        };
+
+        // Find subcell by getting the third element of keyboard input
+        if (currentInput.length === 3) {
           
-  //         // setDebugInfo(`Clicking at: ${screenX}, ${screenY}`);
+          const subCellGrid = document.getElementById(`sub-cell${currentInput[currentInput.length - 1]}`);
+          if (subCellGrid) {
+            console.log(subCellGrid);
+            const clickMode = async (x: number, y: number) => {
+              await invoke('click_here', {
+                x: Math.floor(x), 
+                y: Math.floor(y)
+              });
+              console.log('clicked', x, y);
+            }
+
+            const subCoord = subCellGrid.getBoundingClientRect();
+            const [x, y] = [(subCoord.x + (subCoord.width / 2)), (subCoord.y + (subCoord.height / 2))];
+
+            clickMode(x, y).finally(() => {
+              setCurrentInput([]);
+            });
+          }
           
-  //         // await invoke('move_mouse', {
-  //         //   x: screenX,
-  //         //   y: screenY,
-  //         // });
-          
-  //         setTimeout(() => {
-  //           setIsVisible(false);
-  //           setLastClicked(null);
-  //         }, 100);
-  //       } catch (error) {
-  //         console.error('Failed to move mouse:', error);
-  //       }
-  //     }
-  //   };
+        }
 
-  //   window.addEventListener('keypress', handleKeyPress);
-  //   return () => window.removeEventListener('keypress', handleKeyPress);
-  // }, [isVisible, gridCells]);
-
-  // Shortcut registration useEffect remains the same
-  useEffect(() => {
-    const registerShortcut = async () => {
-      try {
-        await register('Alt+G', () => {
-          setIsVisible(prev => !prev);
-          setLastClicked(null);
-        });
-      } catch (error) {
-        console.error('Failed to register shortcut:', error);
-      }
-    };
-
-    registerShortcut();
-
-    return () => {
-      unregister('Alt+G').catch(console.error);
-    };
-  }, []);
-
-  // async function initShotcut() {
-  //   await register('CommandOrControl+Alt+I', () => {
-  //     console.log("SHORTCUT TRIGGERED");
-  //   })
-  // }
-
-  // useEffect(() => {
-  //   initShotcut()
-  // }, []);
-
-  
-  // "resizable": false,
-  // "fullscreen": true,
-  // "decorations": false,
-  // "transparent": true,
-  // "backgroundColor": null
+        // Cleanup when currentInput changes or after timeout
+        const timeoutId = setTimeout(restoreCell, 5000);
+      
+        // Return cleanup function
+        return () => {
+          clearTimeout(timeoutId);
+          restoreCell();
+        };
+      } 
+    }
+  }, [currentInput]);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-10 flex items-center justify-center">
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-10">
       <div 
-        className="grid bg-opacity-50 gap-0"
+        className="grid gap-0"
         style={{
-          gridTemplateColumns: `repeat(${config.gridSize}, minmax(0, 1fr))`,
+          gridTemplateColumns: `repeat(${gridDimensions.columns}, minmax(0, 1fr))`,
           width: '100vw',
           height: '100vh',
         }}
@@ -234,28 +250,39 @@ function App() {
         {gridCells.map((cell, index) => (
           <div
             key={index}
-            data-id={`cell-${Math.floor(index / config.gridSize)}-${index % config.gridSize}`}
+            data-id={`cell-${Math.floor(index / gridDimensions.columns)}-${index % gridDimensions.columns}`}
+            id={cell.coord}
             className={`
-              border border-dashed border-yellow-700 border-opacity-20 
-              text-white text-opacity-30 text-[10px]
+              border-r border-b border-dashed border-yellow-700 border-opacity-20 
+              text-yellow-100 text-opacity-70 text-xs
               flex items-center justify-center
-              aspect-square
               transition-colors
-              ${cell.coord === lastClicked ? 'bg-yellow-300 bg-opacity-30' : ''}
               hover:bg-white hover:bg-opacity-20
             `}
+            style={{
+              width: `${cell.width}px`,
+              height: `${cell.height}px`,
+              textShadow: `0px 0px 1px black`
+            }}
             onClick={(e) => {
-
-              console.log((e.target as HTMLElement).getBoundingClientRect());
-              console.log('Screen coordinates:', {
+              const rect = (e.target as HTMLElement).getBoundingClientRect();
+              console.log(rect);
+              console.log('Cell coordinates:', {
+                coord: cell.coord,
+                rect,
+                screen: {
                   x: e.screenX,
                   y: e.screenY
+                }
               });
-          }}
+            }}
           >
             {cell.coord}
           </div>
         ))}
+      </div>
+      <div className="fixed bottom-0 text-xs text-white text-opacity-50 left-2">
+        Current Input: {currentInput.join('')}
       </div>
     </div>
   );

@@ -14,11 +14,21 @@
       {
         "title": "kbr",
         "label": "main",
+        "create": true,
         "width": 800,
         "height": 600,
         "decorations": false,
         "transparent": true,
-        "backgroundColor": null
+        "backgroundColor": null,
+        "resizable": false,
+        "fullscreen": true,
+        "hiddenTitle": true,
+        "focus": true,
+        "shadow": false,
+        "skipTaskbar": true,
+        "contentProtected": true,
+        "windowEffects": null,
+        "visible": false
       }
     ],
     "security": {
