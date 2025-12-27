@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Window } from "@tauri-apps/api/window";
-import { register } from "@tauri-apps/plugin-global-shortcut";
-import { restoreStateCurrent, StateFlags } from "@tauri-apps/plugin-window-state";
 
 import "./App.css";
 import {
@@ -20,11 +18,6 @@ const appWindow = new Window("main");
 // Remove window decorations on focus
 appWindow.listen("tauri://focus", async () => {
   await appWindow.setDecorations(false);
-});
-
-// Register global shortcut to show the overlay
-await register("CommandOrControl+Alt+I", async () => {
-  restoreStateCurrent(StateFlags.ALL);
 });
 
 /**
@@ -61,7 +54,10 @@ function GridCellComponent({
       }}
     >
       {showSubCells ? (
-        <div className={`grid w-full h-full grid-cols-${subCellGridSize}`}>
+        <div 
+          className="grid w-full h-full"
+          style={{ gridTemplateColumns: `repeat(${subCellGridSize}, 1fr)` }}
+        >
           {Array.from({ length: subCellGridSize * subCellGridSize }, (_, i) => (
             <div
               key={i}
@@ -88,11 +84,41 @@ interface InputDisplayProps {
 }
 
 function InputDisplay({ currentInput, clickType }: InputDisplayProps) {
+  const isLeftClick = clickType === "left";
+  
   return (
-    <div className="fixed bottom-0 left-2 text-xs text-white text-opacity-50 flex gap-4">
-      <span>Input: {currentInput.join("") || "..."}</span>
-      <span>Mode: {clickType === "left" ? "Left Click" : "Right Click"}</span>
-      <span className="text-opacity-30">(Tab to toggle mode)</span>
+    <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-3">
+      {/* Current input display */}
+      <div className="bg-black bg-opacity-50 border border-yellow-700 border-opacity-40 px-4 py-2 rounded-md flex items-center gap-3">
+        <span 
+          className="font-mono text-xl tracking-wider"
+          style={{ color: "cornsilk", textShadow: "1px 0px 5px black" }}
+        >
+          {currentInput.length > 0 ? currentInput.join("") : "_ _"}
+        </span>
+        
+        {/* Click mode indicator */}
+        <div 
+          className={`
+            px-3 py-1 rounded border text-sm font-semibold
+            ${isLeftClick 
+              ? "border-yellow-400 text-yellow-400" 
+              : "border-orange-400 text-orange-400"
+            }
+          `}
+          style={{ textShadow: "1px 0px 3px black" }}
+        >
+          {isLeftClick ? "L-CLICK" : "R-CLICK"}
+        </div>
+      </div>
+      
+      {/* Help text */}
+      <span 
+        className="text-xs text-opacity-50"
+        style={{ color: "cornsilk", opacity: 0.5 }}
+      >
+        Tab: toggle
+      </span>
     </div>
   );
 }
@@ -129,10 +155,11 @@ function App() {
     (event: KeyboardEvent) => {
       event.preventDefault();
 
-      // Escape clears input
+      // Escape clears input and hides overlay
       if (event.key === "Escape") {
         setCurrentInput([]);
         setActiveCoord(null);
+        appWindow.hide();
         return;
       }
 
@@ -148,9 +175,8 @@ function App() {
         return;
       }
 
-      // Tab toggles click mode
+      // Tab is handled in keydown event
       if (event.key === "Tab") {
-        setClickType((prev) => (prev === "left" ? "right" : "left"));
         return;
       }
 
@@ -179,8 +205,20 @@ function App() {
   );
 
   useEffect(() => {
+    // Use keydown for Tab to prevent default browser behavior
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Tab") {
+        event.preventDefault();
+        setClickType((prev) => (prev === "left" ? "right" : "left"));
+      }
+    };
+    
+    window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyEvent);
-    return () => window.removeEventListener("keyup", handleKeyEvent);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyEvent);
+    };
   }, [handleKeyEvent]);
 
   // Handle sub-cell selection and click execution
