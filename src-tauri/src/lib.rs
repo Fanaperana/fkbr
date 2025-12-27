@@ -90,6 +90,85 @@ fn right_click<R: Runtime>(
     click_at(app, window, x, y, Some(ClickType::Right))
 }
 
+/// Performs a double click at the specified coordinates.
+#[tauri::command]
+fn double_click<R: Runtime>(
+    app: AppHandle<R>,
+    window: Window<R>,
+    x: i32,
+    y: i32,
+) -> Result<(), String> {
+    // Save window state before hiding
+    app.save_window_state(StateFlags::all())
+        .map_err(|e| format!("Failed to save window state: {}", e))?;
+
+    let mut controller = MouseController::new()?;
+    
+    window
+        .hide()
+        .map_err(|e| format!("Failed to hide window: {}", e))?;
+
+    controller.move_to(x, y)?;
+    controller.double_click()
+}
+
+/// Scrolls at the specified coordinates.
+/// Positive amount scrolls up, negative scrolls down.
+#[tauri::command]
+fn scroll_at<R: Runtime>(
+    app: AppHandle<R>,
+    window: Window<R>,
+    x: i32,
+    y: i32,
+    amount: i32,
+) -> Result<(), String> {
+    app.save_window_state(StateFlags::all())
+        .map_err(|e| format!("Failed to save window state: {}", e))?;
+
+    let mut controller = MouseController::new()?;
+    
+    window
+        .hide()
+        .map_err(|e| format!("Failed to hide window: {}", e))?;
+
+    controller.move_to(x, y)?;
+    controller.scroll(amount)
+}
+
+/// Starts a drag operation from the specified coordinates.
+#[tauri::command]
+fn drag_start<R: Runtime>(
+    _app: AppHandle<R>,
+    _window: Window<R>,
+    x: i32,
+    y: i32,
+) -> Result<(), String> {
+    let mut controller = MouseController::new()?;
+    controller.move_to(x, y)?;
+    controller.press_left()
+}
+
+/// Ends a drag operation at the specified coordinates.
+#[tauri::command]
+fn drag_end<R: Runtime>(
+    app: AppHandle<R>,
+    window: Window<R>,
+    x: i32,
+    y: i32,
+) -> Result<(), String> {
+    app.save_window_state(StateFlags::all())
+        .map_err(|e| format!("Failed to save window state: {}", e))?;
+
+    let mut controller = MouseController::new()?;
+    
+    window
+        .hide()
+        .map_err(|e| format!("Failed to hide window: {}", e))?;
+
+    controller.move_to(x, y)?;
+    controller.release_left()
+}
+
 /// Parse modifier string to Modifiers enum
 fn parse_modifiers(mods: &[String]) -> Modifiers {
     let mut result = Modifiers::empty();
@@ -190,8 +269,9 @@ fn setup_tray<R: Runtime>(app: &tauri::App<R>) -> Result<(), Box<dyn std::error:
     // Shortcut info items (disabled, just for display)
     let shortcut_header = MenuItem::with_id(app, "header", "⌨️ Keyboard Shortcuts", false, None::<&str>)?;
     let show_overlay = MenuItem::with_id(app, "show", "  Ctrl+Alt+I  →  Show Overlay", false, None::<&str>)?;
-    let left_click_info = MenuItem::with_id(app, "left", "  [Coord]+[1-9]  →  Left Click", false, None::<&str>)?;
-    let right_click_info = MenuItem::with_id(app, "right", "  Tab to toggle  →  Right Click", false, None::<&str>)?;
+    let click_info = MenuItem::with_id(app, "click", "  [Coord]+[1-9]  →  Click at position", false, None::<&str>)?;
+    let mode_info = MenuItem::with_id(app, "mode", "  Tab  →  Cycle: L-Click / R-Click / Dbl-Click", false, None::<&str>)?;
+    let escape_info = MenuItem::with_id(app, "escape", "  Esc  →  Clear input / Hide overlay", false, None::<&str>)?;
     
     let separator1 = PredefinedMenuItem::separator(app)?;
     let settings_item = MenuItem::with_id(app, "settings", "⚙️ Settings...", true, None::<&str>)?;
@@ -201,8 +281,9 @@ fn setup_tray<R: Runtime>(app: &tauri::App<R>) -> Result<(), Box<dyn std::error:
     let menu = Menu::with_items(app, &[
         &shortcut_header,
         &show_overlay,
-        &left_click_info,
-        &right_click_info,
+        &click_info,
+        &mode_info,
+        &escape_info,
         &separator1,
         &settings_item,
         &separator2,
@@ -212,7 +293,7 @@ fn setup_tray<R: Runtime>(app: &tauri::App<R>) -> Result<(), Box<dyn std::error:
     TrayIconBuilder::new()
         .icon(app.default_window_icon().unwrap().clone())
         .menu(&menu)
-        .menu_on_left_click(true)
+        .show_menu_on_left_click(true)
         .tooltip("FKBR - Keyboard Mouse Control\nCtrl+Alt+I to activate")
         .on_menu_event(|app, event| {
             match event.id.as_ref() {
@@ -270,7 +351,17 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_window_state::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![click_at, left_click, right_click, update_shortcut, open_settings])
+        .invoke_handler(tauri::generate_handler![
+            click_at,
+            left_click,
+            right_click,
+            double_click,
+            scroll_at,
+            drag_start,
+            drag_end,
+            update_shortcut,
+            open_settings
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

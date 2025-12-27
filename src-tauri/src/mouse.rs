@@ -1,4 +1,4 @@
-use enigo::{Button, Coordinate, Direction::Click, Enigo, Mouse, Settings};
+use enigo::{Button, Coordinate, Direction::{Click, Press, Release}, Enigo, Mouse, Settings};
 
 /// MouseController handles all mouse-related operations for the application.
 /// It wraps the enigo library to provide a clean interface for mouse actions.
@@ -40,6 +40,34 @@ impl MouseController {
         self.enigo
             .button(Button::Middle, Click)
             .map_err(|e| format!("Failed to perform middle click: {}", e))
+    }
+
+    /// Performs a double left click at the current cursor position.
+    pub fn double_click(&mut self) -> Result<(), String> {
+        self.left_click()?;
+        std::thread::sleep(std::time::Duration::from_millis(50));
+        self.left_click()
+    }
+
+    /// Scrolls the mouse wheel vertically (positive = up, negative = down).
+    pub fn scroll(&mut self, amount: i32) -> Result<(), String> {
+        self.enigo
+            .scroll(amount, enigo::Axis::Vertical)
+            .map_err(|e| format!("Failed to scroll: {}", e))
+    }
+
+    /// Presses and holds the left mouse button (for drag start).
+    pub fn press_left(&mut self) -> Result<(), String> {
+        self.enigo
+            .button(Button::Left, Press)
+            .map_err(|e| format!("Failed to press left button: {}", e))
+    }
+
+    /// Releases the left mouse button (for drag end).
+    pub fn release_left(&mut self) -> Result<(), String> {
+        self.enigo
+            .button(Button::Left, Release)
+            .map_err(|e| format!("Failed to release left button: {}", e))
     }
 
     /// Moves to coordinates and performs a left click.
