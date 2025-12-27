@@ -1,3 +1,13 @@
+/**
+ * @file InputHandler.ts
+ * @description Handles keyboard input for coordinate selection and click execution.
+ * Manages input buffering, coordinate parsing, and click type cycling.
+ * 
+ * @author Fanaperana
+ * @license MIT
+ * @see https://github.com/Fanaperana/fkbr
+ */
+
 import { ClickType } from "./MouseActions";
 import { CoordinateMode } from "./types";
 

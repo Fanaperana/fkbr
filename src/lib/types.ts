@@ -1,4 +1,15 @@
 /**
+ * @file types.ts
+ * @description Core type definitions for FKBR (F*cking Keyboard).
+ * This file contains all TypeScript interfaces, types, and configuration
+ * constants used throughout the application.
+ * 
+ * @author Fanaperana
+ * @license MIT
+ * @see https://github.com/Fanaperana/fkbr
+ */
+
+/**
  * Represents a single cell in the grid overlay.
  */
 export interface GridCell {

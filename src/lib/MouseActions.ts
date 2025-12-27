@@ -1,3 +1,13 @@
+/**
+ * @file MouseActions.ts
+ * @description Frontend interface for mouse operations.
+ * Provides a clean TypeScript API for invoking Rust mouse commands.
+ * 
+ * @author Fanaperana
+ * @license MIT
+ * @see https://github.com/Fanaperana/fkbr
+ */
+
 import { invoke } from "@tauri-apps/api/core";
 
 /**

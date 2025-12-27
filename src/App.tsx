@@ -1,3 +1,13 @@
+/**
+ * @file App.tsx
+ * @description Main application component for FKBR (F*cking Keyboard).
+ * Renders the grid overlay, handles keyboard input, and executes mouse actions.
+ * 
+ * @author Fanaperana
+ * @license MIT
+ * @see https://github.com/Fanaperana/fkbr
+ */
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Window } from "@tauri-apps/api/window";
 import { listen } from "@tauri-apps/api/event";

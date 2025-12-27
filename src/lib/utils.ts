@@ -1,3 +1,13 @@
+/**
+ * @file utils.ts
+ * @description Utility functions for grid calculations and coordinate generation.
+ * Handles cell sizing, grid dimensions, coordinate mapping, and click positioning.
+ * 
+ * @author Fanaperana
+ * @license MIT
+ * @see https://github.com/Fanaperana/fkbr
+ */
+
 import { GridConfig, MAX_CELLS, CoordinateMode } from "./types";
 
 /** Characters for coordinate generation (A-Z + 0-9 = 36 chars) */

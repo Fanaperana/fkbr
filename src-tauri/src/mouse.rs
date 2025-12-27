@@ -1,3 +1,18 @@
+//! # MouseController Module
+//! 
+//! Handles all mouse-related operations for FKBR.
+//! Wraps the enigo library to provide cross-platform input simulation.
+//! 
+//! ## Features
+//! - Move cursor to absolute screen coordinates
+//! - Left, right, middle, and double click
+//! - Scroll wheel (vertical)
+//! - Drag operations (press/release)
+//! 
+//! @author Fanaperana
+//! @license MIT
+//! @see https://github.com/Fanaperana/fkbr
+
 use enigo::{Button, Coordinate, Direction::{Click, Press, Release}, Enigo, Mouse, Settings};
 
 /// MouseController handles all mouse-related operations for the application.

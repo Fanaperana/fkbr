@@ -1,3 +1,13 @@
+/**
+ * @file GridController.ts
+ * @description Manages the grid overlay system for keyboard-based navigation.
+ * Handles cell generation, layout calculations, and coordinate mapping.
+ * 
+ * @author Fanaperana
+ * @license MIT
+ * @see https://github.com/Fanaperana/fkbr
+ */
+
 import { GridConfig, GridCell, MAX_CELLS } from "./types";
 import { generateCoordinate, usedCoordinates, setCoordinateMode } from "./utils";
 

@@ -1,3 +1,18 @@
+//! # FKBR - F*cking Keyboard
+//! 
+//! Backend library for the FKBR mouseless application.
+//! Provides Tauri commands for mouse control, system tray, and global shortcuts.
+//! 
+//! ## Architecture
+//! - `mouse.rs`: MouseController for input simulation via enigo
+//! - Tauri commands: click_at, left_click, right_click, double_click, scroll_at, etc.
+//! - Global shortcut handler for overlay activation
+//! - System tray with settings access
+//! 
+//! @author Fanaperana
+//! @license MIT
+//! @see https://github.com/Fanaperana/fkbr
+
 use std::sync::Mutex;
 use tauri::{
     menu::{Menu, MenuItem, PredefinedMenuItem},

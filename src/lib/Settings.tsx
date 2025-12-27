@@ -1,3 +1,13 @@
+/**
+ * @file Settings.tsx
+ * @description Settings dialog and configuration management for FKBR.
+ * Handles shortcut customization, grid configuration, and persistent storage.
+ * 
+ * @author Fanaperana
+ * @license MIT
+ * @see https://github.com/Fanaperana/fkbr
+ */
+
 import { useState, useEffect } from "react";
 import { load, Store } from "@tauri-apps/plugin-store";
 import { invoke } from "@tauri-apps/api/core";

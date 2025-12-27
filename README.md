@@ -136,7 +136,23 @@ Or just star the repo and flex your mouse-free lifestyle. ⭐
 
 ---
 
-## 📜 License
+## � Future Features
+
+We're just getting started. Here's what's coming:
+
+- [ ] **Multi-monitor support** — Seamlessly target any screen
+- [ ] **Custom themes** — Change grid colors, opacity, fonts
+- [ ] **Drag-and-drop mode** — Hold and drag with keyboard
+- [ ] **Quick scroll zones** — Scroll without clicking first
+- [ ] **Keyboard macros** — Chain multiple actions
+- [ ] **Accessibility modes** — High contrast, larger cells
+- [ ] **macOS & Linux polish** — Full feature parity
+
+Got ideas? [Open an issue](https://github.com/Fanaperana/fkbr/issues)!
+
+---
+
+## �📜 License
 
 MIT — Do whatever you want.
 
