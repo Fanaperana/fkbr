@@ -27,11 +27,11 @@ Press `Ctrl+Alt+I` to show the overlay grid.
 
 | Key | Action |
 |-----|--------|
-| `Ctrl+Alt+I` | Show/activate overlay |
+| `Ctrl+Alt+I` | Show/activate overlay (customizable) |
 | `A-Z`, `0-9` | Enter coordinate characters |
 | `Tab` | Toggle between left and right click mode |
 | `Backspace` | Delete last character |
-| `Escape` | Clear input and reset |
+| `Escape` | Clear input and hide overlay |
 
 ### Click Modes
 
@@ -39,6 +39,16 @@ Press `Ctrl+Alt+I` to show the overlay grid.
 - **Right Click**: Right mouse button click for context menus
 
 The current click mode is displayed at the bottom of the screen.
+
+### Customizing the Shortcut
+
+1. Right-click the system tray icon
+2. Select "⚙️ Settings..."
+3. Choose your preferred modifier keys (Ctrl, Alt, Shift, Win)
+4. Select the activation key (A-Z or F1-F12)
+5. Click "Save" to apply
+
+Your custom shortcut will be saved and persist across restarts.
 
 ## Development
 

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Window } from "@tauri-apps/api/window";
+import { listen } from "@tauri-apps/api/event";
 
 import "./App.css";
 import {
@@ -12,12 +13,26 @@ import {
   ClickType,
   getSubCellCenter,
 } from "./lib";
+import { SettingsDialog, SettingsManager } from "./lib/Settings";
 
 const appWindow = new Window("main");
 
 // Remove window decorations on focus
 appWindow.listen("tauri://focus", async () => {
   await appWindow.setDecorations(false);
+});
+
+// Load and apply saved shortcut on startup
+SettingsManager.getShortcut().then(async (config) => {
+  try {
+    const { invoke } = await import("@tauri-apps/api/core");
+    await invoke("update_shortcut", {
+      modifiers: config.modifiers,
+      key: config.key,
+    });
+  } catch (e) {
+    console.error("Failed to load saved shortcut:", e);
+  }
 });
 
 /**
@@ -133,6 +148,18 @@ function App() {
   const [currentInput, setCurrentInput] = useState<string[]>([]);
   const [clickType, setClickType] = useState<ClickType>("left");
   const [activeCoord, setActiveCoord] = useState<string | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
+
+  // Listen for settings open event from system tray
+  useEffect(() => {
+    const unlisten = listen("open-settings", () => {
+      setShowSettings(true);
+    });
+    
+    return () => {
+      unlisten.then(fn => fn());
+    };
+  }, []);
 
   // Grid controller instance
   const gridController = useMemo(() => new GridController(config), [config]);
@@ -300,6 +327,10 @@ function App() {
         })}
       </div>
       <InputDisplay currentInput={currentInput} clickType={clickType} />
+      <SettingsDialog 
+        isOpen={showSettings} 
+        onClose={() => setShowSettings(false)} 
+      />
     </div>
   );
 }

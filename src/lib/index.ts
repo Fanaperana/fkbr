@@ -10,3 +10,7 @@ export { InputHandler } from "./InputHandler";
 export { MouseActions } from "./MouseActions";
 export type { ClickType } from "./MouseActions";
 export type { KeyInput, CoordinateCallback, InputChangeCallback } from "./InputHandler";
+
+// Settings
+export { SettingsDialog, SettingsManager } from "./Settings";
+export type { ShortcutConfig } from "./Settings";

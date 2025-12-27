@@ -8,6 +8,10 @@
     "opener:default",
     "global-shortcut:allow-is-registered",
     "global-shortcut:allow-register",
-    "global-shortcut:allow-unregister"
+    "global-shortcut:allow-unregister",
+    "store:allow-get",
+    "store:allow-set",
+    "store:allow-save",
+    "store:allow-load"
   ]
 }
