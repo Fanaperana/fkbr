@@ -1,116 +1,147 @@
-# FKBR - Keyboard-Driven Mouse Control
+# 🎯 FKBR - F*cking Keyboard
 
-A mouseless application that overlays the screen with chord coordinates, allowing you to control mouse clicks using only your keyboard. Built with Tauri, React, and TypeScript.
+> **"Your mouse is a crutch. Prove me wrong."**
 
-## Features
+How long can YOU go without touching your mouse? I challenge you to try **FKBR** (Freaking/F*cking Keyboard) — a desktop app that lets you click *anywhere* on your screen using only your keyboard.
 
-- **Full Screen Grid Overlay**: Displays a coordinate grid over your entire screen
-- **Chord-Based Navigation**: Use 2-character coordinates to select any area on screen
-- **Sub-Cell Precision**: After selecting a cell, choose from a 2x2 or 3x3 sub-grid for precise clicking
-- **Left & Right Click Support**: Toggle between left and right click modes
-- **Global Keyboard Shortcut**: Activate the overlay from anywhere with `Ctrl+Alt+I`
-- **Transparent Overlay**: Semi-transparent background so you can see the content underneath
+No mouse. No trackpad. Just pure keyboard supremacy.
 
-## Usage
+---
 
-### Activating the Overlay
+## 🔥 The Challenge
 
-Press `Ctrl+Alt+I` to show the overlay grid.
+```
+Day 1:   "This is impossible"
+Day 3:   "Okay, I'm getting faster"  
+Day 7:   "Wait, where's my mouse?"
+Day 14:  "Mouse? Never heard of her."
+```
 
-### Selecting a Target
+**Track your streak. Beat your record. Flex on mouse users.**
 
-1. **Enter Coordinate**: Type a 2-character coordinate (e.g., `AA`, `B3`, `XY`) to highlight a cell
-2. **Select Sub-Cell**: Type a number (1-9 for 3x3 grid, 1-4 for 2x2 grid) to select the precise location within the cell
-3. **Click Executes**: The mouse will move to the selected position and click
+---
 
-### Keyboard Controls
+## ⚡ How It Works
 
-| Key | Action |
-|-----|--------|
-| `Ctrl+Alt+I` | Show/activate overlay (customizable) |
-| `A-Z`, `0-9` | Enter coordinate characters |
-| `Tab` | Toggle between left and right click mode |
-| `Backspace` | Delete last character |
-| `Escape` | Clear input and hide overlay |
+1. Press `Ctrl+Alt+I` → Grid overlay appears
+2. Type 2-3 chars (e.g., `AA`, `B5`, `XY0`) → Cell highlights
+3. Type 1-9 → Click that exact spot
+4. Done. No mouse involved. 😎
 
-### Click Modes
+```
+┌─────────────────────────────────────┐
+│  AA  AB  AC  AD  AE  AF  AG  AH ... │
+│  BA  BB  BC  BD  BE  BF  BG  BH ... │
+│  CA  CB  CC  CD  CE  CF  CG  CH ... │
+│  ...                                │
+│           ┌───────────┐             │
+│           │ 1 │ 2 │ 3 │             │
+│     [BD]  │ 4 │ 5 │ 6 │  ← subcells │
+│           │ 7 │ 8 │ 9 │             │
+│           └───────────┘             │
+└─────────────────────────────────────┘
 
-- **Left Click** (default): Standard left mouse button click
-- **Right Click**: Right mouse button click for context menus
+Type "BD5" → clicks center of cell BD
+Type "BD1" → clicks top-left of cell BD
+```
 
-The current click mode is displayed at the bottom of the screen.
+---
 
-### Customizing the Shortcut
+## 🎮 Controls
 
-1. Right-click the system tray icon
-2. Select "⚙️ Settings..."
-3. Choose your preferred modifier keys (Ctrl, Alt, Shift, Win)
-4. Select the activation key (A-Z or F1-F12)
-5. Click "Save" to apply
+| Key | What it does |
+|-----|--------------|
+| `Ctrl+Alt+I` | Summon the grid (customizable) |
+| `A-Z`, `0-9` | Type coordinates |
+| `1-9` | Pick subcell & click |
+| `Tab` | Cycle: Left → Right → Double click |
+| `Backspace` | Undo last char |
+| `Escape` | Abort mission, hide grid |
 
-Your custom shortcut will be saved and persist across restarts.
+---
 
-## Development
+## 🏆 Modes
 
-### Prerequisites
+| Mode | Coordinates | Max Cells | Total Click Positions |
+|------|-------------|-----------|----------------------|
+| **2-Char** | `AA` to `99` | 1,296 | 11,664 |
+| **3-Char** | `AA0` to `999` | 12,960 | 116,640 |
 
-- [Node.js](https://nodejs.org/) (v18 or higher)
-- [pnpm](https://pnpm.io/) package manager
-- [Rust](https://www.rust-lang.org/tools/install)
-- [Tauri CLI](https://tauri.app/v1/guides/getting-started/prerequisites)
+*Choose your precision. Configure in Settings.*
 
-### Setup
+---
+
+## 🚀 Installation
+
+### Download
+Grab the latest release from [Releases](https://github.com/Fanaperana/fkbr/releases).
+
+### Build from source
 
 ```bash
-# Install dependencies
+# Prerequisites: Node.js 18+, pnpm, Rust
+
+git clone https://github.com/Fanaperana/fkbr.git
+cd fkbr
 pnpm install
-
-# Run in development mode
-pnpm tauri dev
-
-# Build for production
 pnpm tauri build
 ```
 
-### Project Structure
+---
+
+## ⚙️ Settings
+
+Right-click the system tray icon → **Settings**
+
+- **Custom shortcut**: Pick your own activation combo
+- **Grid density**: More cells = more precision
+- **Coordinate mode**: 2-char or 3-char
+
+---
+
+## 🛠️ Built With
+
+- **[Tauri](https://tauri.app/)** - Lightweight desktop framework
+- **[React](https://react.dev/)** + **TypeScript** - Frontend
+- **[Rust](https://www.rust-lang.org/)** - Backend & mouse control
+- **[enigo](https://github.com/enigo-rs/enigo)** - Cross-platform input simulation
+
+---
+
+## 📁 Project Structure
 
 ```
 fkbr/
-├── src/                    # Frontend React/TypeScript
-│   ├── lib/               # Core library modules
-│   │   ├── types.ts       # Type definitions
-│   │   ├── utils.ts       # Utility functions
-│   │   ├── GridController.ts    # Grid management
-│   │   ├── InputHandler.ts      # Keyboard input handling
-│   │   └── MouseActions.ts      # Mouse action invocations
-│   └── App.tsx            # Main application component
-├── src-tauri/             # Backend Rust/Tauri
+├── src/                    # React/TypeScript frontend
+│   ├── lib/
+│   │   ├── GridController.ts    # Grid overlay logic
+│   │   ├── InputHandler.ts      # Keyboard input
+│   │   ├── MouseActions.ts      # Click commands
+│   │   └── Settings.tsx         # Settings dialog
+│   └── App.tsx
+├── src-tauri/              # Rust backend
 │   └── src/
-│       ├── lib.rs         # Main library and Tauri commands
-│       ├── mouse.rs       # MouseController struct
-│       └── main.rs        # Application entry point
+│       ├── lib.rs          # Tauri commands
+│       └── mouse.rs        # MouseController
 └── package.json
 ```
 
-## Architecture
+---
 
-### Frontend (TypeScript/React)
+## 🤝 Contributing
 
-- **GridController**: Manages the grid overlay, cell generation, and highlighting
-- **InputHandler**: Handles keyboard input and coordinate parsing
-- **MouseActions**: Wraps Tauri invoke calls for mouse operations
+Found a bug? Want a feature? PRs welcome.
 
-### Backend (Rust)
+Or just star the repo and flex your mouse-free lifestyle. ⭐
 
-- **MouseController**: Encapsulates mouse operations using the `enigo` library
-- **Tauri Commands**: `click_at`, `left_click`, `right_click` for mouse actions
+---
 
-## Recommended IDE Setup
+## 📜 License
 
-- [VS Code](https://code.visualstudio.com/)
-- [Tauri Extension](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode)
-- [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+MIT — Do whatever you want.
 
-## License
+---
 
-MIT
+<p align="center">
+  <b>🐭 Mice are for clicking. Keyboards are for winners. 🏆</b>
+</p>
