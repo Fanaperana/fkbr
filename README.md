@@ -1,163 +1,37 @@
-# 🎯 FKBR - F*cking Keyboard
+<div align="center">
+  <h1>⌨️ fkbr</h1>
+  <p><strong>A cross-platform mouseless desktop app for keyboard-driven mouse control.</strong></p>
 
-> **"Your mouse is a crutch. Prove me wrong."**
-
-How long can YOU go without touching your mouse? I challenge you to try **FKBR** (Freaking/F*cking Keyboard) — a desktop app that lets you click *anywhere* on your screen using only your keyboard.
-
-No mouse. No trackpad. Just pure keyboard supremacy.
-
----
-
-## 🔥 The Challenge
-
-```
-Day 1:   "This is impossible"
-Day 3:   "Okay, I'm getting faster"  
-Day 7:   "Wait, where's my mouse?"
-Day 14:  "Mouse? Never heard of her."
-```
-
-**Track your streak. Beat your record. Flex on mouse users.**
+  ![License](https://img.shields.io/github/license/Fanaperana/fkbr?style=for-the-badge)
+  ![Stars](https://img.shields.io/github/stars/Fanaperana/fkbr?style=for-the-badge)
+  ![Built with Rust](https://img.shields.io/badge/Rust-000000?style=for-the-badge&logo=rust&logoColor=white)
+  ![Tauri](https://img.shields.io/badge/Tauri-FFC131?style=for-the-badge&logo=tauri&logoColor=white)
+  ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+  ![Last Commit](https://img.shields.io/github/last-commit/Fanaperana/fkbr?style=for-the-badge)
+</div>
 
 ---
 
-## ⚡ How It Works
+## 🧪 What is this?
 
-1. Press `Ctrl+Alt+I` → Grid overlay appears
-2. Type 2-3 chars (e.g., `AA`, `B5`, `XY0`) → Cell highlights
-3. Type 1-9 → Click that exact spot
-4. Done. No mouse involved. 😎
+**fkbr** lets you control your mouse entirely from the keyboard — no mouse required. Activate with a hotkey, use keyboard shortcuts to move the cursor and click. Built with Tauri (Rust) + React.
 
-```
-┌─────────────────────────────────────┐
-│  AA  AB  AC  AD  AE  AF  AG  AH ... │
-│  BA  BB  BC  BD  BE  BF  BG  BH ... │
-│  CA  CB  CC  CD  CE  CF  CG  CH ... │
-│  ...                                │
-│           ┌───────────┐             │
-│           │ 1 │ 2 │ 3 │             │
-│     [BD]  │ 4 │ 5 │ 6 │  ← subcells │
-│           │ 7 │ 8 │ 9 │             │
-│           └───────────┘             │
-└─────────────────────────────────────┘
+## ✨ Features
 
-Type "BD5" → clicks center of cell BD
-Type "BD1" → clicks top-left of cell BD
-```
+- ⌨️ Full mouse control via keyboard shortcuts
+- 🖱️ Click, right-click, scroll — all without touching the mouse
+- 🖥️ Cross-platform: Windows, macOS, Linux
+- ⚡ Lightweight native app (Tauri-powered)
+- ♿ Great for accessibility and keyboard-first workflows
 
----
-
-## 🎮 Controls
-
-| Key | What it does |
-|-----|--------------|
-| `Ctrl+Alt+I` | Summon the grid (customizable) |
-| `A-Z`, `0-9` | Type coordinates |
-| `1-9` | Pick subcell & click |
-| `Tab` | Cycle: Left → Right → Double click |
-| `Backspace` | Undo last char |
-| `Escape` | Abort mission, hide grid |
-
----
-
-## 🏆 Modes
-
-| Mode | Coordinates | Max Cells | Total Click Positions |
-|------|-------------|-----------|----------------------|
-| **2-Char** | `AA` to `99` | 1,296 | 11,664 |
-| **3-Char** | `AA0` to `999` | 12,960 | 116,640 |
-
-*Choose your precision. Configure in Settings.*
-
----
-
-## 🚀 Installation
-
-### Download
-Grab the latest release from [Releases](https://github.com/Fanaperana/fkbr/releases).
-
-### Build from source
+## 🚀 Getting Started
 
 ```bash
-# Prerequisites: Node.js 18+, pnpm, Rust
-
-git clone https://github.com/Fanaperana/fkbr.git
-cd fkbr
-pnpm install
-pnpm tauri build
+npm install
+npm run tauri dev
+npm run tauri build
 ```
 
----
+## 📄 License
 
-## ⚙️ Settings
-
-Right-click the system tray icon → **Settings**
-
-- **Custom shortcut**: Pick your own activation combo
-- **Grid density**: More cells = more precision
-- **Coordinate mode**: 2-char or 3-char
-
----
-
-## 🛠️ Built With
-
-- **[Tauri](https://tauri.app/)** - Lightweight desktop framework
-- **[React](https://react.dev/)** + **TypeScript** - Frontend
-- **[Rust](https://www.rust-lang.org/)** - Backend & mouse control
-- **[enigo](https://github.com/enigo-rs/enigo)** - Cross-platform input simulation
-
----
-
-## 📁 Project Structure
-
-```
-fkbr/
-├── src/                    # React/TypeScript frontend
-│   ├── lib/
-│   │   ├── GridController.ts    # Grid overlay logic
-│   │   ├── InputHandler.ts      # Keyboard input
-│   │   ├── MouseActions.ts      # Click commands
-│   │   └── Settings.tsx         # Settings dialog
-│   └── App.tsx
-├── src-tauri/              # Rust backend
-│   └── src/
-│       ├── lib.rs          # Tauri commands
-│       └── mouse.rs        # MouseController
-└── package.json
-```
-
----
-
-## 🤝 Contributing
-
-Found a bug? Want a feature? PRs welcome.
-
-Or just star the repo and flex your mouse-free lifestyle. ⭐
-
----
-
-## � Future Features
-
-We're just getting started. Here's what's coming:
-
-- [ ] **Multi-monitor support** — Seamlessly target any screen
-- [ ] **Custom themes** — Change grid colors, opacity, fonts
-- [ ] **Drag-and-drop mode** — Hold and drag with keyboard
-- [ ] **Quick scroll zones** — Scroll without clicking first
-- [ ] **Keyboard macros** — Chain multiple actions
-- [ ] **Accessibility modes** — High contrast, larger cells
-- [ ] **macOS & Linux polish** — Full feature parity
-
-Got ideas? [Open an issue](https://github.com/Fanaperana/fkbr/issues)!
-
----
-
-## �📜 License
-
-MIT — Do whatever you want.
-
----
-
-<p align="center">
-  <b>🐭 Mice are for clicking. Keyboards are for winners. 🏆</b>
-</p>
+MIT © [Prince Ralambomanarivo](https://github.com/Fanaperana)
